@@ -12,17 +12,28 @@ services:
     labels:
       - "traefik.enable=true"
 
-      # Route: http://pi-server-1.local/kuma
+      # Public route
       - "traefik.http.routers.kuma.rule=PathPrefix(`/kuma`)"
       - "traefik.http.routers.kuma.entrypoints=web"
 
-      # Forward traffic to Kuma's internal port
+      # Internal service port
       - "traefik.http.services.kuma.loadbalancer.server.port=3001"
 
-      # Rewrite /kuma → / so Kuma serves its dashboard correctly
-      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.regex=^/kuma(.*)"
-      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.replacement=/$$1"
-      - "traefik.http.routers.kuma.middlewares=kuma-rewrite"
+      # 1) Strip /kuma before forwarding
+      - "traefik.http.middlewares.kuma-strip.stripprefix.prefixes=/kuma"
+
+      # 2) Rewrite internal redirects back to /kuma
+      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.regex=^/dashboard(.*)"
+      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.replacement=/kuma/dashboard$$1"
+
+      - "traefik.http.middlewares.kuma-rewrite2.replacepathregex.regex=^/assets/(.*)"
+      - "traefik.http.middlewares.kuma-rewrite2.replacepathregex.replacement=/kuma/assets/$$1"
+
+      - "traefik.http.middlewares.kuma-rewrite3.replacepathregex.regex=^/api/(.*)"
+      - "traefik.http.middlewares.kuma-rewrite3.replacepathregex.replacement=/kuma/api/$$1"
+
+      # Apply all middlewares
+      - "traefik.http.routers.kuma.middlewares=kuma-strip,kuma-rewrite,kuma-rewrite2,kuma-rewrite3"
 
     networks:
       - traefik-net
