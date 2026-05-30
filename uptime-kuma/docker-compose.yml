@@ -19,10 +19,10 @@ services:
       # Internal service port
       - "traefik.http.services.kuma.loadbalancer.server.port=3001"
 
-      # 1) Strip /kuma before forwarding
+      # Strip /kuma before forwarding
       - "traefik.http.middlewares.kuma-strip.stripprefix.prefixes=/kuma"
 
-      # 2) Rewrite internal redirects back to /kuma
+      # Rewrite internal redirects back to /kuma
       - "traefik.http.middlewares.kuma-rewrite.replacepathregex.regex=^/dashboard(.*)"
       - "traefik.http.middlewares.kuma-rewrite.replacepathregex.replacement=/kuma/dashboard$$1"
 
