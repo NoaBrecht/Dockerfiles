@@ -15,7 +15,9 @@ services:
       - "--entrypoints.web.address=:80"
       - "--api.dashboard=true"
       - "--api.insecure=true"
+      - "--log.level=DEBUG"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=PathPrefix(`/traefik`)"
-      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.api.rule=PathPrefix(`/traefik`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.entrypoints=web"
