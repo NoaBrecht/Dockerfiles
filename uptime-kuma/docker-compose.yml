@@ -1,17 +1,29 @@
+version: "3.8"
+
 services:
   uptime-kuma:
     image: louislam/uptime-kuma:latest
     container_name: uptime-kuma
     restart: always
+
     volumes:
       - /srv/docker/uptime-kuma/data:/app/data
+
     labels:
       - "traefik.enable=true"
+
+      # Route: http://pi-server-1.local/kuma
       - "traefik.http.routers.kuma.rule=PathPrefix(`/kuma`)"
       - "traefik.http.routers.kuma.entrypoints=web"
+
+      # Forward traffic to Kuma's internal port
       - "traefik.http.services.kuma.loadbalancer.server.port=3001"
-      - "traefik.http.middlewares.kuma-strip.stripprefix.prefixes=/kuma"
-      - "traefik.http.routers.kuma.middlewares=kuma-strip"
+
+      # Rewrite /kuma → / so Kuma serves its dashboard correctly
+      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.regex=^/kuma(.*)"
+      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.replacement=/$$1"
+      - "traefik.http.routers.kuma.middlewares=kuma-rewrite"
+
     networks:
       - traefik-net
 
