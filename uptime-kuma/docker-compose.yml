@@ -19,12 +19,20 @@ services:
       # Internal service port
       - "traefik.http.services.kuma.loadbalancer.server.port=3001"
 
-      # Rewrite /kuma → / so Kuma sees its root correctly
-      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.regex=^/kuma(.*)"
-      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.replacement=/$$1"
+      # Rewrite /dashboard → /kuma/dashboard
+      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.regex=^/dashboard(.*)"
+      - "traefik.http.middlewares.kuma-rewrite.replacepathregex.replacement=/kuma/dashboard$$1"
 
-      # Apply middleware
-      - "traefik.http.routers.kuma.middlewares=kuma-rewrite"
+      # Rewrite /assets/* → /kuma/assets/*
+      - "traefik.http.middlewares.kuma-rewrite2.replacepathregex.regex=^/assets/(.*)"
+      - "traefik.http.middlewares.kuma-rewrite2.replacepathregex.replacement=/kuma/assets/$$1"
+
+      # Rewrite /api/* → /kuma/api/*
+      - "traefik.http.middlewares.kuma-rewrite3.replacepathregex.regex=^/api/(.*)"
+      - "traefik.http.middlewares.kuma-rewrite3.replacepathregex.replacement=/kuma/api/$$1"
+
+      # Apply all middlewares
+      - "traefik.http.routers.kuma.middlewares=kuma-rewrite,kuma-rewrite2,kuma-rewrite3"
 
     networks:
       - traefik-net
