@@ -5,10 +5,13 @@ services:
     image: traefik:latest
     container_name: traefik
     restart: always
+
     ports:
       - "80:80"
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -16,8 +19,15 @@ services:
       - "--api.dashboard=true"
       - "--api.insecure=true"
       - "--log.level=DEBUG"
+
     labels:
       - "traefik.enable=true"
+
+      # Dashboard router
       - "traefik.http.routers.api.rule=PathPrefix(`/traefik`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.api.entrypoints=web"
+
+      # Strip /traefik prefix so dashboard loads correctly
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/traefik"
+      - "traefik.http.routers.api.middlewares=api-strip"
