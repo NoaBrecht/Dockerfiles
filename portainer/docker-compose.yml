@@ -1,16 +1,16 @@
-version: "3.8"
-
+name: portainer
 services:
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
-    restart: always
     ports:
-      - "9000:9000"
-      - "9443:9443"
+      - 9000:9000
+      - 9443:9443
+    command: -H unix:///var/run/docker.sock
+    restart: always
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "portainer-data:/data"
 
 volumes:
-  portainer_data:
+  portainer-data:
