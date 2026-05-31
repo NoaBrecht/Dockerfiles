@@ -8,8 +8,8 @@ services:
       - "8096:8096"
       - "8920:8920"
     volumes:
-      - jellyfin-config:/config
-      - jellyfin-cache:/cache
+      - media_jellyfin-config:/config
+      - media_jellyfin-cache:/cache
       - /media/movies:/media/movies
       - /media/shows:/media/shows
     restart: unless-stopped
@@ -23,12 +23,74 @@ services:
       - LOG_LEVEL=info
       - TZ=Europe/Brussels
     volumes:
-      - jellyseerr-config:/app/config
+      - media_jellyseerr-config:/app/config
     restart: unless-stopped
 
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+      - WEBUI_PORT=8080
+    volumes:
+      - media_qbittorrent-config:/config
+      - /media/downloads:/downloads
+    restart: unless-stopped
 
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    ports:
+      - "7878:7878"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - media_radarr-config:/config
+      - /media/movies:/movies
+      - /media/downloads:/downloads
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    ports:
+      - "8989:8989"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - media_sonarr-config:/config
+      - /media/shows:/shows
+      - /media/downloads:/downloads
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    ports:
+      - "9696:9696"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - media_prowlarr-config:/config
+    restart: unless-stopped
 
 volumes:
-  jellyfin-config:
-  jellyfin-cache:
-  jellyseerr-config:
+  media_jellyfin-config:
+  media_jellyfin-cache:
+  media_jellyseerr-config:
+  media_qbittorrent-config:
+  media_radarr-config:
+  media_sonarr-config:
+  media_prowlarr-config:
