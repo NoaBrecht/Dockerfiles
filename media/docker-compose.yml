@@ -14,6 +14,19 @@ services:
       - /media/shows:/media/shows
     restart: unless-stopped
 
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    ports:
+      - "5055:5055"
+    environment:
+      - LOG_LEVEL=info
+      - TZ=Europe/Brussels
+    volumes:
+      - jellyseerr-config:/app/config
+    restart: unless-stopped
+
 volumes:
   jellyfin-config:
   jellyfin-cache:
+  jellyseerr-config:
