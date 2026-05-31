@@ -22,9 +22,12 @@ services:
     environment:
       - LOG_LEVEL=info
       - TZ=Europe/Brussels
+      - PUID=1000
+      - PGID=1000
     volumes:
       - jellyseerr-config:/app/config
     restart: unless-stopped
+
 
 volumes:
   jellyfin-config:
