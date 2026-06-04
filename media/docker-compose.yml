@@ -88,25 +88,12 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Brussels
-      - FLARESOLVERR_HOST=http://flaresolver:8191
+      - FLARESOLVERR_HOST=${FLARESOLVERR_HOST}
     volumes:
       - media_prowlarr-config:/config
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=1
     restart: unless-stopped
-    depends_on:
-      - flaresolver
-    networks:
-      - media-network
-
-  flaresolver:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolver
-    restart: always
-    environment:
-      - LOG_LEVEL=info
-    networks:
-      - media-network
 
 volumes:
   media_jellyfin-config:
@@ -115,7 +102,3 @@ volumes:
   media_radarr-config:
   media_sonarr-config:
   media_prowlarr-config:
-
-networks:
-  media-network:
-    driver: bridge
