@@ -12,10 +12,10 @@ services:
     volumes:
       - /var/run/dbus:/var/run/dbus:ro
       - home-assistant-data:/config
-    devices:
-      # Uncomment and adjust for USB devices (Zigbee dongle, Z-Wave stick, etc.)
-      # - /dev/ttyUSB0:/dev/ttyUSB0
-      # - /dev/ttyACM0:/dev/ttyACM0
+    # Uncomment and add USB devices (Zigbee dongle, Z-Wave stick, etc.)
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    #   - /dev/ttyACM0:/dev/ttyACM0
 
 volumes:
   home-assistant-data:
