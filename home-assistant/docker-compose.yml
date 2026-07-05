@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  home-assistant:
+    image: homeassistant/home-assistant:latest
+    container_name: home-assistant
+    privileged: true
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - TZ=UTC
+    volumes:
+      - /var/run/dbus:/var/run/dbus:ro
+      - home-assistant-data:/config
+    devices:
+      # Uncomment and adjust for USB devices (Zigbee dongle, Z-Wave stick, etc.)
+      # - /dev/ttyUSB0:/dev/ttyUSB0
+      # - /dev/ttyACM0:/dev/ttyACM0
+
+volumes:
+  home-assistant-data:
+    driver: local
