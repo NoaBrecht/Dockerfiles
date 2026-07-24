@@ -6,5 +6,5 @@ services:
       - "8080:80"
     volumes:
       - /media:/srv
-      - filebrowser_filebrowser-config:/database
+      - /media/filebrowser/db:/database
     restart: unless-stopped
