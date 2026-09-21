@@ -1,6 +1,6 @@
 services:
   openwebrx:
-    image: jankriedt/openwebrx:latest
+    image: jketterl/openwebrx:latest
     container_name: openwebrx
     ports:
       - "8073:8073"
