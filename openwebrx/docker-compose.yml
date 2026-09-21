@@ -1,0 +1,27 @@
+services:
+  openwebrx:
+    image: jankriedt/openwebrx:latest
+    container_name: openwebrx
+    ports:
+      - "8073:8073"
+    volumes:
+      - openwebrx-config:/var/lib/openwebrx
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    restart: unless-stopped
+    networks:
+      - default
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.openwebrx.rule=Host(`openwebrx.local`)"
+      - "traefik.http.routers.openwebrx.entrypoints=web"
+      - "traefik.http.services.openwebrx.loadbalancer.server.port=8073"
+
+volumes:
+  openwebrx-config:
+
+networks:
+  traefik-net:
+    external: true
