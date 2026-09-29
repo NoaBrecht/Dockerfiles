@@ -1,4 +1,18 @@
 services:
+  mp4-to-mkv:
+    build: ./mp4-to-mkv
+    container_name: mp4-to-mkv
+    restart: unless-stopped
+    init: true
+    user: "1000:1000"
+    environment:
+      - TZ=Europe/Brussels
+      - SCAN_INTERVAL=60
+      - MIN_AGE_MINUTES=2
+      - DELETE_ORIGINAL=false
+    volumes:
+      - /media/movies:/watch/movies
+      - /media/shows:/watch/shows
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
