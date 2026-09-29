@@ -107,7 +107,7 @@ services:
       - TZ=Europe/Brussels
       - SCAN_INTERVAL=60        # seconds between scans
       - MIN_AGE_MINUTES=2       # skip files that are still being written
-      - DELETE_ORIGINAL=false   # remove the .mp4 after a successful conversion
+      - DELETE_ORIGINAL=true   # remove the .mp4 after a successful conversion
     volumes:
       - /media/movies:/watch/movies
       - /media/shows:/watch/shows
