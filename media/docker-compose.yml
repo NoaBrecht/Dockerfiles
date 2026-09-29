@@ -1,19 +1,4 @@
 services:
-  mp4-to-mkv:
-    build: ./mp4-to-mkv
-    pull_policy: build
-    container_name: mp4-to-mkv
-    restart: unless-stopped
-    init: true
-    user: "1000:1000"
-    environment:
-      - TZ=Europe/Brussels
-      - SCAN_INTERVAL=60
-      - MIN_AGE_MINUTES=2
-      - DELETE_ORIGINAL=false
-    volumes:
-      - /media/movies:/watch/movies
-      - /media/shows:/watch/shows
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
@@ -111,6 +96,74 @@ services:
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=1
     restart: unless-stopped
+  mp4-to-mkv:
+    image: alpine:3.20
+    container_name: mp4-to-mkv
+    restart: unless-stopped
+    init: true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+      - SCAN_INTERVAL=60        # seconds between scans
+      - MIN_AGE_MINUTES=2       # skip files that are still being written
+      - DELETE_ORIGINAL=false   # remove the .mp4 after a successful conversion
+    volumes:
+      - /media/movies:/watch/movies
+      - /media/shows:/watch/shows
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apk add --no-cache ffmpeg tzdata > /dev/null || exit 1
+        trap 'exit 0' TERM INT
+        SKIP=/tmp/skip
+        touch "$$SKIP"
+
+        log() {
+          echo "$$(date '+%F %T') $$*"
+        }
+
+        # Copy all streams into MKV; if subtitles can't be converted, retry without them.
+        remux() {
+          ffmpeg -nostdin -loglevel error -y -i "$$1" \
+            -map 0 -map -0:d? -c copy -c:s srt -f matroska "$$2" ||
+          ffmpeg -nostdin -loglevel error -y -i "$$1" \
+            -map 0:v -map 0:a? -c copy -f matroska "$$2"
+        }
+
+        convert() {
+          src="$$1"
+          dst="$${src%.*}.mkv"
+          tmp="$$dst.part"
+
+          grep -qxF "$$src" "$$SKIP" && return
+
+          if [ -e "$$dst" ]; then
+            log "Skipped, MKV already exists: $$src"
+            echo "$$src" >> "$$SKIP"
+            return
+          fi
+
+          log "Converting: $$src"
+          if remux "$$src" "$$tmp"; then
+            touch -r "$$src" "$$tmp"
+            mv "$$tmp" "$$dst"
+            chown "$$PUID:$$PGID" "$$dst"
+            [ "$$DELETE_ORIGINAL" = true ] && rm -f "$$src"
+            log "Done: $$dst"
+          else
+            rm -f "$$tmp"
+            echo "$$src" >> "$$SKIP"
+            log "Failed: $$src"
+          fi
+        }
+
+        log "Watching /watch (delete original: $$DELETE_ORIGINAL)"
+        while true; do
+          find /watch -type f -iname '*.mp4' -mmin +"$$MIN_AGE_MINUTES" |
+            while IFS= read -r f; do convert "$$f"; done
+          sleep "$$SCAN_INTERVAL" & wait $$!
+        done
 volumes:
   media_jellyfin-config:
   media_jellyfin-cache:
