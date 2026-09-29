@@ -1,6 +1,7 @@
 services:
   mp4-to-mkv:
     build: ./mp4-to-mkv
+    pull_policy: build
     container_name: mp4-to-mkv
     restart: unless-stopped
     init: true
